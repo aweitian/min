@@ -78,7 +78,7 @@ class Router
         if ($rc->hasMethod($act)) {
             $controller = $rc->newInstance();
             $method = $rc->getMethod($act);
-            $method->invokeArgs($controller, array());
+            $method->invokeArgs($controller, array($this->container));
         }
     }
 

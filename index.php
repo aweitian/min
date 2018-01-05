@@ -15,6 +15,6 @@ $app = new \lib\Container();
 $app->instance("app",$app);
 $router = new \lib\Router($app);
 $app->instance("router",$router);
-
-
-$router->dispatch(requestUri());
+$path = requestUri();
+$path = explode("?",$path);
+$router->dispatch($path[0]);
