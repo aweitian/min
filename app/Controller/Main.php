@@ -1,21 +1,21 @@
 <?php
+
 namespace app\Controller;
 
-use lib\Container;
+use app\Provider\Reward;
+use app\Provider\Session;
+use app\Provider\Share;
+use app\Provider\User;
+use lib\View;
 
-class Main
+
+class Main extends Controller
 {
-    public static function check(Container $app)
-    {
-//        $app->make('aa');
-        return true;
-    }
+    /**
+     * @throws \Exception
+     */
     public function index()
     {
-        echo "hello world.";
-    }
-    public function notfound()
-    {
-        echo "hello world.";
+        echo "hello world!";
     }
 }

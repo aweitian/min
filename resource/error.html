@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="author" content="rookie" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="format-detection" content="telephone=no" />
+    <title>error</title>
+    <meta name="keywords" content="">
+    <meta name="description" content="">
+    <link rel="stylesheet" href="public/css/error-base.css" />
+    <link rel="stylesheet" href="public/css/error-css.css" />
+</head>
+
+<body>
+<div id="container">
+    <script>
+
+        (function (win, doc) {
+            /*页面自适应*/
+            var oContainer = doc.getElementById('container');
+            var oHtml = doc.getElementsByTagName('html')[0];
+            fnResetHtmlFontSize();
+            function fnResetHtmlFontSize() {
+                var iContainerWidth = oContainer.offsetWidth;
+                oHtml.style.fontSize = iContainerWidth / 10 + 'px';
+            }
+            win.addEventListener('resize', fnResetHtmlFontSize, false);
+        })(window, document);</script>
+
+
+
+    <div class="error">
+        <b><img src="public/images/error1.jpg"></b>
+        <h2>{error}</h2>
+        <p><a href=""><img src="public/images/error2.jpg">&nbsp;返回</a></p>
+    </div>
+
+</div>
+</body>
+</html>

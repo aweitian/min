@@ -14,9 +14,9 @@ use ReflectionClass;
 class Container implements ArrayAccess
 {
     //绑定实例
-    public $bindings = [];
+    public $bindings = array();
     //单例服务
-    public $instances = [];
+    public $instances = array();
 
     /**
      * 服务绑定到容器
@@ -191,9 +191,9 @@ class Container implements ArrayAccess
      * @return array
      * @throws Exception
      */
-    public function getDependencies($parameters, array $env = [])
+    public function getDependencies($parameters, array $env = array())
     {
-        $dependencies = [];
+        $dependencies = array();
         //参数列表
         foreach ($parameters as $parameter) {
             //获取参数类型

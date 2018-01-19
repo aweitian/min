@@ -14,12 +14,15 @@ use InvalidArgumentException;
 
 class View
 {
+    protected $ext_path = '';
+    protected $viewFile = '';
+    protected $inc_File = '';
     /**
      * All of the finished, captured sections.
      *
      * @var array
      */
-    protected $sections = [];
+    protected $sections = array();
 
     /**
      * 可以用于SECTION 中 嵌套 SECTION
@@ -28,48 +31,75 @@ class View
      *
      * @var array
      */
-    protected $sectionStack = [];
+    protected $sectionStack = array();
 
     /***
      * @var array
      */
-    protected $yields = [];
+    protected $yields = array();
     /**
      * The parent placeholder for the request.
      *
      * @var array
      */
-    protected static $parentPlaceholder = [];
+    protected static $parentPlaceholder = array();
 
-    protected $viewFile;
+    protected $tpl_dir;
 
-    protected $data = [];
+    protected $data = array();
 
     public $response = '';
-    public function __construct($path)
+
+    public function __construct($tpl_dir)
     {
-        $this->viewFile = $path;
+        $this->tpl_dir = $tpl_dir;
     }
 
-    public function extend($path)
+    /**
+     * PATH可以是index/index or index  or index.php
+     * @param $path
+     * @param bool $isAbsPath
+     */
+    public function extend($path, $isAbsPath = false)
     {
-        $path = $this->fixPath($path);
-        if (file_exists($path))
-        {
+        $path = $this->fixPath($path, $isAbsPath);
+        $this->ext_path = $path;
+        if (file_exists($this->ext_path)) {
             extract($this->data);
             ob_start();
-            include $path;
+            include $this->ext_path;
             $this->response = ob_get_clean();
+        }
+        else
+        {
+            echo "<!-- {$this->ext_path} is nonexist -->";
         }
     }
 
-    protected function fixPath($path)
+    /**
+     * @param $path
+     * @param bool $isAbsPath
+     */
+    public function includeFile($path, $isAbsPath = false)
     {
-        if (strpos($path,"/") === false)
-        {
-            return dirname($this->viewFile)."/$path";
+        $this->inc_File = $this->fixPath($path, $isAbsPath);
+        if (file_exists($this->inc_File)) {
+            extract($this->data);
+            include $this->inc_File;
         }
-        return $path;
+
+    }
+
+    /**
+     * @param $path
+     * @param $isAbsPath
+     * @return string
+     */
+    public function fixPath($path, $isAbsPath)
+    {
+        if ($isAbsPath) return $path;
+
+        return $this->tpl_dir . (substr($this->tpl_dir, -1, 1) == '/' ? '' : '/') . $path . (substr($path,-4,4) == '.php' ? '' : '.php');
     }
 
     /**
@@ -148,12 +178,9 @@ class View
     protected function extendSection($section, $content, $prepend = true)
     {
         if (isset($this->sections[$section])) {
-            if ($prepend)
-            {
+            if ($prepend) {
                 $content = $this->sections[$section] . $content;
-            }
-            else
-            {
+            } else {
                 $content = $content . $this->sections[$section];
             }
         }
@@ -230,17 +257,21 @@ class View
      */
     public function flushSections()
     {
-        $this->sections = [];
-        $this->sectionStack = [];
+        $this->sections = array();
+        $this->sectionStack = array();
     }
 
     /**
+     * PATH可以是index/index or index  or index.php
      * Get the evaluated contents of the object.
      *
+     * @param $path
+     * @param bool $isAbsPath
      * @return string
      */
-    public function render()
+    public function render($path,$isAbsPath = false)
     {
+        $this->viewFile = $this->fixPath($path,$isAbsPath);
         if (file_exists($this->viewFile)) {
             extract($this->data);
             ob_start();
@@ -249,12 +280,11 @@ class View
         } else {
             return "{$this->viewFile} is not exists";
         }
-        $placeholders = [];
-        foreach ($this->yields as $key => $value)
-        {
+        $placeholders = array();
+        foreach ($this->yields as $key => $value) {
             $placeholders[$value] = $this->sections[$key];
         }
-        return strtr($this->response,$placeholders) ;
+        return strtr($this->response, $placeholders);
     }
 
     /**

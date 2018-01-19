@@ -24,37 +24,8 @@ class Router
         $this->container = $container;
     }
 
-    public function dispatch($path)
+    public function dispatch($ctl,$act)
     {
-        $path = trim($path, "/");
-        $arr = explode("/", $path);
-        switch (count($arr)) {
-            case 0:
-                $ctl = $this->default_control;
-                $act = $this->default_action;
-                break;
-            case 1:
-                $ctl = $arr[0];
-                $act = $this->default_action;
-                $ctl = $this->clean($ctl);
-                if ($ctl == "") {
-                    $ctl = $this->default_control;
-                }
-                break;
-            default:
-                $ctl = $arr[0];
-                $act = $arr[1];
-                $ctl = $this->clean($ctl);
-                if ($ctl == "") {
-                    $ctl = $this->default_control;
-                }
-                $act = $this->clean($act);
-                if ($act == "") {
-                    $act = $this->default_action;
-                }
-                break;
-        }
-
         $cls = $this->namespace . ucfirst(strtolower($ctl));
         if (!class_exists($cls)) {
             $this->_404();
@@ -70,32 +41,46 @@ class Router
                 )
             );
             if ($privilege !== true) {
-                $this->_401();
+                $this->error("没有权限!");
                 return;
             }
         }
 
         if ($rc->hasMethod($act)) {
-            $controller = $rc->newInstance();
+            $controller = $rc->newInstance($this->container);
             $method = $rc->getMethod($act);
-            $method->invokeArgs($controller, array($this->container));
+            $method->invokeArgs($controller, array());
+        } else {
+            $this->_404();
+            return;
         }
     }
 
-    protected function clean($str)
+    public function info($info)
     {
-        return preg_replace("/[^\w]/", "", $str);
+        $content = file_get_contents(__DIR__."/../resource/info.html");
+        print str_replace("{info}",$info,$content);
+        exit;
+    }
+
+    public function debug($info)
+    {
+        $content = file_get_contents(__DIR__."/../resource/debug.html");
+        print str_replace("{debug}",$info,$content);
+        exit;
     }
 
     public function _404()
     {
-        echo "404";
+        $content = file_get_contents(__DIR__."/../resource/404.html");
+        print $content;
         exit;
     }
 
-    public function _401()
+    public function error($error)
     {
-        echo "401";
+        $content = file_get_contents(__DIR__."/../resource/error.html");
+        print str_replace("{error}",$error,$content);
         exit;
     }
 }

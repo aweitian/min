@@ -13,7 +13,7 @@ use Exception;
 class Connection
 {
     // 查询语句日志
-    protected static $queryLogs = [];
+    protected static $queryLogs = array();
     protected $config;
 
     /**
@@ -41,9 +41,9 @@ class Connection
         $this->config = $config;
         $this->chkConf();
         $dns = 'mysql:host=' . $this->getHost() . ';port=' . $this->getPort() . ';dbname=' . $this->getDbName();
-        $links = new PDO ($dns, $config ['user'], $config ['password'], [
+        $links = new PDO ($dns, $config ['user'], $config ['password'], array(
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES '" . $this->getCharset() . "'"
-        ]);
+        ));
         $links->exec("SET sql_mode = ''");
         $this->pdo = $links;
     }
@@ -119,7 +119,7 @@ class Connection
      * @return int
      * @throws Exception
      */
-    public function insert($sql, $data = [], $bindType = [])
+    public function insert($sql, $data = array(), $bindType = array())
     {
         self::$queryLogs [] = $sql . " " . var_export($data, true);
         $sth = $this->pdo->prepare($sql);
@@ -146,7 +146,7 @@ class Connection
      * @return mixed|null
      * @throws Exception
      */
-    public function scalar($sql, $data = [], $bindType = [])
+    public function scalar($sql, $data = array(), $bindType = array())
     {
         $sth = $this->pdo->prepare($sql);
         self::$queryLogs [] = $sql . " " . var_export($data, true);
@@ -180,7 +180,7 @@ class Connection
      * @return array ;
      * @throws Exception
      */
-    public function fetch($sql, $data = [], $bindType = [], $fetch_mode = \PDO::FETCH_ASSOC)
+    public function fetch($sql, $data = array(), $bindType = array(), $fetch_mode = \PDO::FETCH_ASSOC)
     {
         $sth = $this->pdo->prepare($sql);
         self::$queryLogs [] = $sql . " " . var_export($data, true);
@@ -195,7 +195,7 @@ class Connection
         if (@$sth->execute()) {
             $ret = $sth->fetch();
             if (!is_array($ret))
-                return [];
+                return array();
             return $ret;
         }
         $error = $sth->errorInfo();
@@ -213,7 +213,7 @@ class Connection
      * @return array ;
      * @throws Exception
      */
-    public function fetchAll($sql, $data = [], $bindType = [], $fetch_mode = \PDO::FETCH_ASSOC)
+    public function fetchAll($sql, $data = array(), $bindType = array(), $fetch_mode = \PDO::FETCH_ASSOC)
     {
         $sth = $this->pdo->prepare($sql);
         self::$queryLogs [] = $sql . " " . var_export($data, true);
@@ -244,7 +244,7 @@ class Connection
      * @return int
      * @throws Exception
      */
-    public function exec($sql, $data = [], $bindType = [])
+    public function exec($sql, $data = array(), $bindType = array())
     {
         $sth = $this->pdo->prepare($sql);
         if (!$sth) {
