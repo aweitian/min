@@ -50,6 +50,20 @@ function getAction()
     );
 }
 
+function get_current_url()
+{
+    $url = 'http://';
+    if (isset ($_SERVER ['HTTPS']) && $_SERVER ['HTTPS'] == 'on') {
+        $url = 'https://';
+    }
+    if ($_SERVER ['SERVER_PORT'] != (isset ($_SERVER ['HTTPS']) && $_SERVER ['HTTPS'] == 'on' ? '443' : '80')) {
+        $url .= $_SERVER ['SERVER_NAME'] . ':' . $_SERVER ['SERVER_PORT'] . $_SERVER ['REQUEST_URI'];
+    } else {
+        $url .= $_SERVER ['SERVER_NAME'] . $_SERVER ['REQUEST_URI'];
+    }
+    return $url;
+}
+
 function u($action = null, $control = null)
 {
     $ca = getAction();
@@ -73,6 +87,18 @@ function utf8_output($string)
 {
     echo '<meta content="text/html; charset=utf-8" http-equiv="content-type" />';
     echo $string;
+}
+
+function get_rand_char($length = 4) {
+    $str = "";
+    $strPol = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789abcdefghijklmnopqrstuvwxyz";
+    $max = strlen ( $strPol ) - 1;
+
+    for($i = 0; $i < $length; $i ++) {
+        $str .= $strPol [rand ( 0, $max )];
+    }
+
+    return $str;
 }
 
 if (!function_exists("array_column")) {
