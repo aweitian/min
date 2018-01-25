@@ -74,7 +74,7 @@ class Log
      */
     public function setLogName($name)
     {
-        $this->log_name = strtr($name, array('{}', date('Y-m-d', time())));
+        $this->log_name = strtr($name, array('{}', date('Y-m-d'=> time())));
         return $this;
     }
 

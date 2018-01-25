@@ -50,6 +50,15 @@ function getAction()
     );
 }
 
+function arr_get($arr,$key)
+{
+    if (is_string($key) && array_key_exists($key,$arr))
+    {
+        return $arr[$key];
+    }
+    return null;
+}
+
 function get_current_url()
 {
     $url = 'http://';
@@ -62,6 +71,17 @@ function get_current_url()
         $url .= $_SERVER ['SERVER_NAME'] . $_SERVER ['REQUEST_URI'];
     }
     return $url;
+}
+
+function getIp()
+{
+    return getenv("REMOTE_ADDR");
+}
+
+function getUa()
+{
+    $ua = new \lib\UserAgent();
+    return $ua->agent;
 }
 
 function u($action = null, $control = null)
