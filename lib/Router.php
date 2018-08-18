@@ -24,8 +24,12 @@ class Router
         $this->container = $container;
     }
 
-    public function dispatch($ctl,$act)
+    public function dispatch($ctl, $act, $namespace = null, $input = array())
     {
+        if (!is_null($namespace)) {
+            $this->namespace = $namespace;
+        }
+
         $cls = $this->namespace . ucfirst(strtolower($ctl));
         if (!class_exists($cls)) {
             $this->_404();
@@ -47,9 +51,13 @@ class Router
         }
 
         if ($rc->hasMethod($act)) {
-            $controller = $rc->newInstance($this->container);
+            if ($rc->hasMethod("__construct")) {
+                $controller = $rc->newInstance($this->container);
+            } else {
+                $controller = $rc->newInstance();
+            }
             $method = $rc->getMethod($act);
-            $method->invokeArgs($controller, array());
+            $method->invokeArgs($controller, $input);
         } else {
             $this->_404();
             return;
@@ -58,29 +66,32 @@ class Router
 
     public function info($info)
     {
-        $content = file_get_contents(__DIR__."/../resource/info.html");
-        print str_replace("{info}",$info,$content);
+        $content = file_get_contents(__DIR__ . "/../resource/info.html");
+        print str_replace("{info}", $info, $content);
         exit;
     }
 
     public function debug($info)
     {
-        $content = file_get_contents(__DIR__."/../resource/debug.html");
-        print str_replace("{debug}",$info,$content);
+        $content = file_get_contents(__DIR__ . "/../resource/debug.html");
+        print str_replace("{debug}", $info, $content);
         exit;
     }
 
     public function _404()
     {
-        $content = file_get_contents(__DIR__."/../resource/404.html");
+        if (PHP_SAPI == 'cli') {
+            exit('command not found');
+        }
+        $content = file_get_contents(__DIR__ . "/../resource/404.html");
         print $content;
         exit;
     }
 
     public function error($error)
     {
-        $content = file_get_contents(__DIR__."/../resource/error.html");
-        print str_replace("{error}",$error,$content);
+        $content = file_get_contents(__DIR__ . "/../resource/error.html");
+        print str_replace("{error}", $error, $content);
         exit;
     }
 }

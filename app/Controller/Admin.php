@@ -9,7 +9,7 @@ use app\Provider\User;
 use lib\View;
 
 
-class Main extends Controller
+class Admin extends Controller
 {
     /**
      * @throws \Exception

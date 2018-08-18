@@ -7,16 +7,19 @@
 namespace lib;
 
 use Closure;
-use ArrayAccess;
 use Exception;
 use ReflectionClass;
 
-class Container implements ArrayAccess
+class Container
 {
+    public $msg;
+    public $hasError = false;
     //绑定实例
     public $bindings = array();
     //单例服务
     public $instances = array();
+    //alias
+    public $alias = array();
 
     /**
      * 服务绑定到容器
@@ -39,6 +42,24 @@ class Container implements ArrayAccess
     public function bound($name)
     {
         return array_key_exists($name, $this->instances) || array_key_exists($name, $this->bindings);
+    }
+
+    protected function reset()
+    {
+        $this->msg = '';
+        $this->hasError = false;
+    }
+
+    public function setAlias(array $alias)
+    {
+        $this->alias = $alias;
+        return $this;
+    }
+
+    public function registerAlias($key, $class)
+    {
+        $this->alias[$key] = $class;
+        return $this;
     }
 
     /**
@@ -75,7 +96,6 @@ class Container implements ArrayAccess
      * @param bool $force 单例
      *
      * @return mixed|object
-     * @throws Exception
      */
     public function make($name, $force = false)
     {
@@ -101,7 +121,7 @@ class Container implements ArrayAccess
      *
      * @return mixed
      */
-    private function getClosure($name)
+    protected function getClosure($name)
     {
         return isset($this->bindings[$name]) ? $this->bindings[$name]['closure'] : $name;
     }
@@ -112,7 +132,6 @@ class Container implements ArrayAccess
      * @param $function
      *
      * @return mixed
-     * @throws Exception
      */
     public function callFunction($function)
     {
@@ -148,21 +167,28 @@ class Container implements ArrayAccess
      * @param mixed $className 生成方式 类或闭包函数
      *
      * @return object
-     * @throws Exception
      */
     public function build($className)
     {
+        $this->reset();
         //匿名函数
         if ($className instanceof Closure) {
             //执行闭包函数
             return $this->callFunction($className);
         }
 
+        $alias = $className;
+        if (array_key_exists($alias, $this->alias)) {
+            $className = $this->alias[$alias];
+        }
         //获取类信息
         $reflector = new ReflectionClass($className);
         // 检查类是否可实例化, 排除抽象类abstract和对象接口interface
+
         if (!$reflector->isInstantiable()) {
-            throw new Exception("$className 不能实例化.");
+            $this->hasError = true;
+            $this->msg = "$className 不能实例化.";
+            return null;
         }
         //获取类的构造函数
         $constructor = $reflector->getConstructor();
@@ -189,7 +215,6 @@ class Container implements ArrayAccess
      *
      * @param array $env
      * @return array
-     * @throws Exception
      */
     public function getDependencies($parameters, array $env = array())
     {
@@ -211,7 +236,6 @@ class Container implements ArrayAccess
                 $dependencies[] = $this->make($dependency->name);
             }
         }
-
         return $dependencies;
     }
 
@@ -221,7 +245,6 @@ class Container implements ArrayAccess
      * @param \ReflectionParameter $parameter
      *
      * @return mixed
-     * @throws Exception
      */
     public function resolveNonClass($parameter)
     {
@@ -229,38 +252,8 @@ class Container implements ArrayAccess
         if ($parameter->isDefaultValueAvailable()) {
             return $parameter->getDefaultValue();
         }
-
-        throw new Exception('参数无默认值');
-    }
-
-    public function offsetExists($key)
-    {
-        return isset($this->bindings[$key]);
-    }
-
-    /**
-     * @param mixed $key
-     * @return mixed|object
-     * @throws Exception
-     */
-    public function offsetGet($key)
-    {
-        return $this->make($key);
-    }
-
-    public function offsetSet($key, $value)
-    {
-        if (!$value instanceof Closure) {
-            $value = function () use ($value) {
-                return $value;
-            };
-        }
-
-        $this->bind($key, $value);
-    }
-
-    public function offsetUnset($key)
-    {
-        unset($this->bindings[$key], $this->instances[$key]);
+        $this->msg = '参数无默认值';
+        $this->hasError = true;
+        return null;
     }
 }

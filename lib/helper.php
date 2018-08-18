@@ -9,46 +9,50 @@ define('DEFAULT_CONTROL', 'main');
 define('DEFAULT_ACTION', 'index');
 define('ROUTE_NAME', 'r');
 define('ROUTE_SEPARATOR', '.');
-function getAction()
+if (!function_exists("getAction"))
 {
-    if (isset($_GET[ROUTE_NAME])) {
-        $path = $_GET[ROUTE_NAME];
-    } else {
-        $path = '';
-    }
-    $path = trim($path, ROUTE_SEPARATOR);
-    $arr = explode(ROUTE_SEPARATOR, $path);
-    switch (count($arr)) {
-        case 0:
-            $ctl = DEFAULT_CONTROL;
-            $act = DEFAULT_ACTION;
-            break;
-        case 1:
-            $ctl = $arr[0];
-            $act = DEFAULT_ACTION;
-            $ctl = preg_replace("/[^\w]/", "", $ctl);
-            if ($ctl == "") {
+    function getAction()
+    {
+        if (isset($_GET[ROUTE_NAME])) {
+            $path = $_GET[ROUTE_NAME];
+        } else {
+            $path = '';
+        }
+        $path = trim($path, ROUTE_SEPARATOR);
+        $arr = explode(ROUTE_SEPARATOR, $path);
+        switch (count($arr)) {
+            case 0:
                 $ctl = DEFAULT_CONTROL;
-            }
-            break;
-        default:
-            $ctl = $arr[0];
-            $act = $arr[1];
-            $ctl = preg_replace("/[^\w]/", "", $ctl);
-            if ($ctl == "") {
-                $ctl = DEFAULT_CONTROL;
-            }
-            $act = preg_replace("/[^\w]/", "", $act);
-            if ($act == "") {
                 $act = DEFAULT_ACTION;
-            }
-            break;
+                break;
+            case 1:
+                $ctl = $arr[0];
+                $act = DEFAULT_ACTION;
+                $ctl = preg_replace("/[^\w]/", "", $ctl);
+                if ($ctl == "") {
+                    $ctl = DEFAULT_CONTROL;
+                }
+                break;
+            default:
+                $ctl = $arr[0];
+                $act = $arr[1];
+                $ctl = preg_replace("/[^\w]/", "", $ctl);
+                if ($ctl == "") {
+                    $ctl = DEFAULT_CONTROL;
+                }
+                $act = preg_replace("/[^\w]/", "", $act);
+                if ($act == "") {
+                    $act = DEFAULT_ACTION;
+                }
+                break;
+        }
+        return array(
+            'ctl' => $ctl,
+            'act' => $act
+        );
     }
-    return array(
-        'ctl' => $ctl,
-        'act' => $act
-    );
 }
+
 
 function arr_get($arr,$key)
 {
@@ -145,3 +149,13 @@ if (!function_exists("array_column")) {
     }
 }
 
+//function getIP(){
+//    if (getenv("HTTP_CLIENT_IP"))
+//        $ip = getenv("HTTP_CLIENT_IP");
+//    else if(getenv("HTTP_X_FORWARDED_FOR"))
+//        $ip = getenv("HTTP_X_FORWARDED_FOR");
+//    else if(getenv("REMOTE_ADDR"))
+//        $ip = getenv("REMOTE_ADDR");
+//    else $ip = "Unknow";
+//    return $ip;
+//}

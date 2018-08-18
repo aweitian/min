@@ -1,0 +1,36 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: Administrator
+ * Date: 2018/8/18
+ * Time: 10:14
+ */
+if (PHP_SAPI != 'cli')
+    exit;
+function getAction()
+{
+    global $argv;
+    array_shift($argv);
+    if (!isset($argv[0])) {
+        return array(
+            'ctl' => 'main',
+            'act' => "index"
+        );
+    }
+    $raw = $argv[0];
+    array_shift($argv);
+    $arr = explode(':', $raw, 2);
+    if (count($arr) == 1) {
+        return array(
+            'ctl' => $raw,
+            'act' => "index"
+        );
+    }
+    return array(
+        'ctl' => $arr[0],
+        'act' => $arr[1]
+    );
+}
+
+define('DEFAULT_CTL_NAMESPACE', '\\app\\Console\\');
+include "index.php";

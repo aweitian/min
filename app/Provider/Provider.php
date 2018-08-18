@@ -7,14 +7,16 @@
  */
 namespace app\Provider;
 
+use lib\Container;
+
 abstract class Provider
 {
     /**
-     * @var \lib\Container $app
+     * @var Container $app
      */
     protected $app;
 
-    public function __construct(\lib\Container $app)
+    public function __construct(Container $app)
     {
         $this->app = $app;
     }
